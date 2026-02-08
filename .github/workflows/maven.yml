@@ -28,7 +28,12 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn compile
+      run: mvn clean package
+    - name: upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: java -jar
+        path: target/*.jar
       
   Security-check:
 
@@ -37,6 +42,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: java -jar
     - name: Trivy Instalation
       run: |
         sudo apt-get install -y wget apt-transport-https gnupg lsb-release
@@ -51,6 +60,27 @@ jobs:
       run: sudo apt install gitleaks -y 
     - name: Gitleaks Code Scan
       run: gitleaks detect --source . --report-format json --report-path gitleaks-report.json
+  
+  test:
+
+    runs-on: self-hosted
+    needs: Security-check
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: test with Maven
+      run: test mvn
+
+      
+
+      
+      
 
       
         
