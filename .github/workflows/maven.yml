@@ -76,6 +76,40 @@ jobs:
         cache: maven
     - name: test with Maven
       run: test mvn
+      
+  qualitygate:
+    runs-on: self-hosted
+    needs: test
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: download artifacts
+      uses: action/download-artifact@v4
+      with:
+        name: java -jar
+    - name: enfore quality rule
+      run: |
+        echo "Fail if coverage < 80%"
+
+  publish:
+    runs-on: self-hosted
+    needs: qualitygate
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: java -jar
+    - name: publih artifact
+      run: downloaded artifact
+
+       
+    
+   
+ 
+
+      
 
       
 
