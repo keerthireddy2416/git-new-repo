@@ -29,5 +29,31 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn compile
+      
+  Security-check:
+
+    runs-on: ubuntu-latest
+    needs: compile
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Trivy Instalation
+      run: |
+        sudo apt-get install -y 
+        wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update -y
+        sudo apt-get install -y trivy 
+    - name: Trivy FS Scan
+      run: trivy fs --format json -o trivy-fs-report.json .
+    - name: Gitleaks Instalation
+      run: sudo apt install gitleaks -y 
+    - name: Gitleaks Code Scan
+      run: gitleaks detect --source . --report-format json --report-path gitleaks-report.json
+
+      
+        
+      
 
    
